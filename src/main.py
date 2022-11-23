@@ -1,7 +1,9 @@
 import io
 import logging
+from io import BytesIO
 from typing import Dict, Union
 
+from fastapi import Response
 from PIL import Image
 import torch
 import numpy as np
@@ -13,10 +15,6 @@ from transformers.models.detr.feature_extraction_detr import rgb_to_id
 
 
 class Message(BaseModel):
-    message: str
-
-
-class PredictResult(BaseModel):
     message: str
 
 
@@ -47,7 +45,7 @@ async def health() -> Message:
 
 
 @app.post("/api/v1/predict", responses={**DEFAULT_RESPONSES})
-async def predict(file: bytes = File()) -> Union[PredictResult, JSONResponse]:
+async def predict(file: bytes = File()) -> Union[Response, JSONResponse]:
     """Predict endpoint."""
     try:
         image = Image.open(io.BytesIO(file))
@@ -66,8 +64,13 @@ async def predict(file: bytes = File()) -> Union[PredictResult, JSONResponse]:
             for y in range(panoptic_seg_id.shape[1]):
                 mask[x, y] = COLORS[panoptic_seg_id[x, y]]
 
-        Image.fromarray(mask).save("test.png")
-        return PredictResult(message="hello")
+        image = Image.fromarray(mask)
+
+        with BytesIO() as buf:
+            image.save(buf, format='PNG')
+            image_bytes = buf.getvalue()
+
+        return Response(image_bytes, media_type='image/png')
 
     except Exception as exception:
         logger.exception(str(exception))
