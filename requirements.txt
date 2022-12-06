@@ -1,7 +1,7 @@
 requests
 pillow
 numpy
-transformers
+transformers==4.24.0
 timm
 fastapi
 uvicorn
