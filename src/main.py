@@ -27,15 +27,9 @@ logger = logging.getLogger(__name__)
 INPUT_FOLDER = "Inputs"
 OUTPUT_FOLDER = "Outputs"
 
-ACCESS_KEY = os.getenv("ACCESS_KEY")
-SECRET_KEY = os.getenv("SECRET_KEY")
 BUCKET = os.getenv("BUCKET")
 
-app.client = boto3.client(
-    "s3",
-    aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY,
-)
+app.client = boto3.client("s3")
 
 
 DEFAULT_RESPONSES: Dict = {
